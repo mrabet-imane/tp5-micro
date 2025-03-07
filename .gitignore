@@ -1,0 +1,9 @@
+# Ignorer les dépendances installées
+node_modules/
+
+# Ignorer les fichiers de configuration sensibles
+.env
+
+# Ignorer les fichiers générés par l'IDE ou le système
+.DS_Store
+*.log

@@ -1,6 +1,8 @@
 const express = require('express');
 const Teacher = require('../models/Teacher');
 const verifyToken = require('../middleware/verifyToken'); 
+const axios = require('axios');
+
 
 const router = express.Router();
 
@@ -28,6 +30,7 @@ router.post('/add', verifyToken, async (req, res) => {
   }
 });
 
+
 router.post('/assign/:professeur_id/:cours_id', verifyToken, async (req, res) => {
   try {
     const { professeur_id, cours_id } = req.params;
@@ -37,7 +40,18 @@ router.post('/assign/:professeur_id/:cours_id', verifyToken, async (req, res) =>
       return res.status(404).json({ message: 'Teacher not found' });
     }
 
-  
+    console.log(`Fetching course data from: http://localhost:5004/course/${cours_id}`);
+    const response = await axios.get(`http://localhost:5004/course/${cours_id}`);
+
+    const course = response.data;
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+    if (course.assigned) {
+      return res.status(400).json({ message: 'Course is already assigned or unavailable' });
+    }
+
     if (teacher.cours.includes(cours_id)) {
       return res.status(400).json({ message: 'Course already assigned to this teacher' });
     }
@@ -55,8 +69,19 @@ router.get('/enrolledStudents/:cours_id', async (req, res) => {
   try {
     const { cours_id } = req.params;
 
-  
-    const students = await Student.find({ cours: cours_id });
+    if (!cours_id) {
+      return res.status(400).json({ message: 'Course ID is required' });
+    }
+
+    const STUDENT_SERVICE_URL = 'http://localhost:5005'; 
+
+    const response = await axios.get(`${STUDENT_SERVICE_URL}/student/students/enrolled/${cours_id}`);
+    const students = response.data;
+
+    if (!students || students.length === 0) {
+      return res.status(404).json({ message: 'No students enrolled in this course' });
+    }
+
     res.json(students);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching enrolled students', error: err.message });

@@ -1,8 +1,9 @@
 const express = require('express');
 const Course = require('../models/Course');
-const verifyToken = require('../middleware/verifyToken'); // Middleware pour vérifier le token JWT
+const verifyToken = require('../middleware/verifyToken'); 
 
 const router = express.Router();
+
 
 
 router.get('/all', async (req, res) => {
@@ -11,6 +12,22 @@ router.get('/all', async (req, res) => {
     res.json(courses);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching courses', error: err.message });
+  }
+});
+
+router.get('/:id', async (req, res) => {
+  try {
+    const courseId = req.params.id;
+
+  
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    res.json(course);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching course', error: err.message });
   }
 });
 

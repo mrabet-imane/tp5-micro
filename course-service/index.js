@@ -3,7 +3,7 @@ const connectDB = require('./db');
 const courseRoutes = require('./routes/course');
 
 const app = express();
-const PORT = 5000;
+const PORT = 5004;
 
 app.use(express.json());
 
